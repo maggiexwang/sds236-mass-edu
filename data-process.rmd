@@ -19,6 +19,7 @@ edu_orig <- read.csv("MA_Public_Schools_2017.csv")
 # Explore and select variables
 glimpse(edu_orig)
 
+# Only look at high schools
 edu <- edu_orig %>% 
   select(Grade, District.Name, TOTAL_Enrollment,
          X..High.Needs, X..Economically.Disadvantaged, 
@@ -28,8 +29,15 @@ edu <- edu_orig %>%
          X..MCAS_10thGrade_English_P.A, X..MCAS_10thGrade_English_W.F,
          X..MCAS_10thGrade_Math_P.A, X..MCAS_10thGrade_Math_W.F, 
          297:298) %>% 
-  filter(Grade == "09,10,11,12")
+  filter(Grade == "09,10,11,12") %>% 
+  select(-Grade)
+```
 
+```{r}
+# Further exploration, decide to calculate mean or median
+summary(edu)
+
+# Calculate summary by district
 
 ```
 
