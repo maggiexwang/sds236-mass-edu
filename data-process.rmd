@@ -17,23 +17,48 @@ edu_orig <- read.csv("MA_Public_Schools_2017.csv")
 
 ```{r}
 # Explore and select variables
-glimpse(edu_orig)
 
 # Only look at high schools
 edu <- edu_orig %>% 
-  select(Grade, District.Name, TOTAL_Enrollment,
-         X..High.Needs, X..Economically.Disadvantaged, 
+  select(School.Code, Grade, District.Name, TOTAL_Enrollment,
+         High.Needs, Economically.Disadvantaged, 
          42:50, Average.In.District.Expenditures.per.Pupil,
-         Average.Expenditures.per.Pupil, X..Dropped.Out, 
-         X..Permanently.Excluded, 95:97, 
-         X..MCAS_10thGrade_English_P.A, X..MCAS_10thGrade_English_W.F,
-         X..MCAS_10thGrade_Math_P.A, X..MCAS_10thGrade_Math_W.F, 
+         Average.Expenditures.per.Pupil, X..Dropped.Out,  
+         MCAS_10thGrade_English_P.A.., MCAS_10thGrade_English_W.F..,
+         MCAS_10thGrade_Math_P.A.., MCAS_10thGrade_Math_W.F.., 
          297:298) %>% 
   filter(Grade == "09,10,11,12") %>% 
-  select(-Grade)
+  mutate(dropout = (X..Dropped.Out * TOTAL_Enrollment)/100, 
+         black = (X..African.American * TOTAL_Enrollment)/100, 
+         white = (X..White * TOTAL_Enrollment)/100, 
+         hispanic = (X..Hispanic * TOTAL_Enrollment)/100, 
+         asian = (X..Asian * TOTAL_Enrollment)/100, 
+         other_re = (X..Native.American + X..Native.Hawaiian..Pacific.Islander + 
+                    X..Multi.Race..Non.Hispanic) * TOTAL_Enrollment/100, 
+         male = (X..Males * TOTAL_Enrollment)/100, 
+         female = (X..Females * TOTAL_Enrollment)/100) %>% 
+  rename("district" = "District.Name", 
+           "total_enroll" = "TOTAL_Enrollment", "high_need" = "High.Needs", 
+           "econ_dis" = "Economically.Disadvantaged", 
+           "avg_dist_exp_p" = "Average.In.District.Expenditures.per.Pupil", 
+           "avg_exp_p" = "Average.Expenditures.per.Pupil", 
+           "mcas_10_eng_pa" = "MCAS_10thGrade_English_P.A..", 
+           "mcas_10_eng_wf" = "MCAS_10thGrade_English_W.F..", 
+           "mcas_10_mth_pa" = "MCAS_10thGrade_Math_P.A..", 
+           "mcas_10_mth_wf" = "MCAS_10thGrade_Math_W.F..", 
+           "ppi_all" = "Progress.and.Performance.Index..PPI....All.Students", 
+           "ppi_high_need" = "Progress.and.Performance.Index..PPI....High.Needs.Students") %>% 
+  select(district, total_enroll, high_need, econ_dis,
+         black, white, hispanic, asian, other_re,
+         male, female, avg_dist_exp_p, avg_exp_p, 
+         mcas_10_eng_pa, mcas_10_eng_wf, 
+         mcas_10_mth_pa, mcas_10_mth_wf,
+         ppi_all, ppi_high_need)
 ```
 
 ```{r}
+#
+
 # Further exploration, decide to calculate mean or median
 summary(edu)
 
