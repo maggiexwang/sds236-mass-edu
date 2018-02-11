@@ -20,7 +20,7 @@ edu_orig <- read.csv("MA_Public_Schools_2017.csv")
 
 # Only look at high schools
 edu <- edu_orig %>% 
-  select(School.Code, Grade, District.Name, 
+  select(School.Code, Grade, District.Name, Town,  
          TOTAL_Enrollment, X10_Enrollment,
          High.Needs, Economically.Disadvantaged, 
          42:50, Average.In.District.Expenditures.per.Pupil,
@@ -40,7 +40,7 @@ edu <- edu_orig %>%
          female = (X..Females * TOTAL_Enrollment)/100) %>% 
   rename("district" = "District.Name", "total_enroll" = "TOTAL_Enrollment", 
          "enroll_10" = "X10_Enrollment", "high_need" = "High.Needs", 
-         "econ_dis" = "Economically.Disadvantaged", 
+         "econ_dis" = "Economically.Disadvantaged", "town" = "Town", 
          "avg_dist_exp_p" = "Average.In.District.Expenditures.per.Pupil", 
          "avg_exp_p" = "Average.Expenditures.per.Pupil", 
          "mcas_10_eng_pa" = "MCAS_10thGrade_English_P.A..", 
@@ -49,7 +49,7 @@ edu <- edu_orig %>%
          "mcas_10_mth_wf" = "MCAS_10thGrade_Math_W.F..", 
          "ppi_all" = "Progress.and.Performance.Index..PPI....All.Students", 
          "ppi_high_need" = "Progress.and.Performance.Index..PPI....High.Needs.Students") %>% 
-  select(district, total_enroll, enroll_10,
+  select(district, town, total_enroll, enroll_10,
          high_need, econ_dis, dropout, 
          black, white, hispanic, asian, other_re,
          male, female, avg_dist_exp_p, avg_exp_p, 
@@ -60,8 +60,8 @@ edu <- edu_orig %>%
 
 ```{r}
 # Calculate district total
-edu_district <- edu %>% 
-  group_by(district) %>% 
+edu_town_district <- edu %>% 
+  group_by(town, district) %>% 
   summarize(n_school = n(), enroll = sum(total_enroll), 
             enroll_10 = sum(enroll_10),
             dropout = sum(dropout),
@@ -81,7 +81,7 @@ edu_district <- edu %>%
             ppi_high_need = mean(ppi_high_need, na.rm = TRUE))
 
 # Calculate district rates
-edu_district <- edu_district %>% 
+edu_district <- edu_town_district %>% 
   mutate(dropout = dropout/enroll, 
          high_need = high_need/enroll, 
          econ_dis = econ_dis/enroll, 
@@ -98,5 +98,43 @@ edu_district <- edu_district %>%
 ```{r}
 phoenix_charter <- edu_orig %>% 
   filter(School.Name == "Phoenix Charter Academy")
+```
+
+
+```{r}
+edu_town <- edu_town_district %>% 
+  group_by(town) %>% 
+  summarise(n_school = sum(n_school), 
+            enroll = sum(enroll), 
+            dropout = sum(dropout), 
+            high_need = sum(high_need), 
+            econ_dis = sum(econ_dis), 
+            black = sum(black), white = sum(white), 
+            hispanic = sum(hispanic), asian = sum(asian), 
+            other_re = sum(other_re))
+
+edu_town <- edu_town %>% 
+  mutate(dropout = dropout/enroll, 
+         high_need = high_need/enroll, 
+         econ_dis = econ_dis/enroll, 
+         black = black/enroll, white = white/enroll, 
+         hispanic = hispanic/enroll, asian = asian/enroll, 
+         other_re = other_re/enroll)
+```
+
+```{r}
+top_drop_town <- edu_town %>% 
+  filter(dropout >= 0.10)
+
+boston_drop <- edu_district %>% 
+  filter(district == "Boston", 
+         dropout >= 0.10)
+```
+
+
+```{r}
+# Boston Wins The Dropout Race: 
+# Home to 50% of The Towns with High School Dropout Rates Over 10% 
+
 ```
 
