@@ -57,7 +57,25 @@ edu <- edu_orig %>%
 ```
 
 ```{r}
-#
+# Calculate district total
+edu_district <- edu %>% 
+  group_by(district) %>% 
+  summarize(n_school = n(), enroll = sum(total_enroll), 
+            high_need = sum(high_need), 
+            econ_dis = sum(econ_dis), 
+            black = sum(black), white = sum(white), 
+            hispanic = sum(hispanic), asian = sum(asian), 
+            other_re = sum(other_re), male = sum(male), 
+            female = sum(female), 
+            avg_dist_exp_p = median(avg_dist_exp_p), 
+            avg_exp_p = median(avg_exp_p), 
+            mcas_10_eng_pa = sum(mcas_10_eng_pa), 
+            mcas_10_eng_wf = sum(mcas_10_eng_wf), 
+            mcas_10_mth_pa = sum(mcas_10_mth_pa), 
+            mcas_10_mth_wf = sum(mcas_10_mth_wf), 
+            ppi_all = mean(ppi_all), ppi_high_need = mean(ppi_high_need))
+
+
 
 # Further exploration, decide to calculate mean or median
 summary(edu)
