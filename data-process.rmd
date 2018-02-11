@@ -50,7 +50,7 @@ edu <- edu_orig %>%
          "ppi_all" = "Progress.and.Performance.Index..PPI....All.Students", 
          "ppi_high_need" = "Progress.and.Performance.Index..PPI....High.Needs.Students") %>% 
   select(district, total_enroll, enroll_10,
-         high_need, econ_dis,
+         high_need, econ_dis, dropout, 
          black, white, hispanic, asian, other_re,
          male, female, avg_dist_exp_p, avg_exp_p, 
          mcas_10_eng_pa, mcas_10_eng_wf, 
@@ -64,6 +64,7 @@ edu_district <- edu %>%
   group_by(district) %>% 
   summarize(n_school = n(), enroll = sum(total_enroll), 
             enroll_10 = sum(enroll_10),
+            dropout = sum(dropout),
             high_need = sum(high_need), 
             econ_dis = sum(econ_dis), 
             black = sum(black), white = sum(white), 
@@ -81,7 +82,8 @@ edu_district <- edu %>%
 
 # Calculate district rates
 edu_district <- edu_district %>% 
-  mutate(high_need = high_need/enroll, 
+  mutate(dropout = dropout/enroll, 
+         high_need = high_need/enroll, 
          econ_dis = econ_dis/enroll, 
          black = black/enroll, white = white/enroll, 
          hispanic = hispanic/enroll, asian = asian/enroll, 
@@ -91,10 +93,10 @@ edu_district <- edu_district %>%
          mcas_10_eng_wf = mcas_10_eng_wf/enroll_10,
          mcas_10_mth_pa = mcas_10_mth_pa/enroll_10, 
          mcas_10_mth_wf = mcas_10_mth_wf/enroll_10)
+```
 
-# Further exploration, decide to calculate mean or median
-
-# Calculate summary by district
-
+```{r}
+phoenix_charter <- edu_orig %>% 
+  filter(School.Name == "Phoenix Charter Academy")
 ```
 
