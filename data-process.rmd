@@ -1,0 +1,35 @@
+---
+title: "Data for One Number Story"
+author: "Maggie Wang"
+date: "February 11, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+```
+
+```{r}
+# pull in data
+edu_orig <- read.csv("MA_Public_Schools_2017.csv")
+```
+
+```{r}
+# Explore and select variables
+glimpse(edu_orig)
+
+edu <- edu_orig %>% 
+  select(Grade, District.Name, TOTAL_Enrollment,
+         X..High.Needs, X..Economically.Disadvantaged, 
+         42:50, Average.In.District.Expenditures.per.Pupil,
+         Average.Expenditures.per.Pupil, X..Dropped.Out, 
+         X..Permanently.Excluded, 95:97, 
+         X..MCAS_10thGrade_English_P.A, X..MCAS_10thGrade_English_W.F,
+         X..MCAS_10thGrade_Math_P.A, X..MCAS_10thGrade_Math_W.F, 
+         297:298) %>% 
+  filter(Grade == "09,10,11,12")
+
+
+```
+
