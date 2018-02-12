@@ -20,25 +20,27 @@ edu_orig <- read.csv("MA_Public_Schools_2017.csv")
 
 # Only look at high schools
 edu <- edu_orig %>% 
-  select(School.Code, Grade, District.Name, Town,  
-         TOTAL_Enrollment, X10_Enrollment,
+  mutate(Grade = as.character(Grade)) %>%
+  filter(endsWith(Grade, "09,10,11,12")) %>%
+  select(School.Code, Grade, District.Name, Town, 26:29,
          High.Needs, Economically.Disadvantaged, 
          42:50, Average.In.District.Expenditures.per.Pupil,
          Average.Expenditures.per.Pupil, X..Dropped.Out,  
          MCAS_10thGrade_English_P.A.., MCAS_10thGrade_English_W.F..,
          MCAS_10thGrade_Math_P.A.., MCAS_10thGrade_Math_W.F.., 
          297:298) %>% 
-  filter(Grade == "09,10,11,12") %>% 
-  mutate(dropout = (X..Dropped.Out * TOTAL_Enrollment)/100, 
-         black = (X..African.American * TOTAL_Enrollment)/100, 
-         white = (X..White * TOTAL_Enrollment)/100, 
-         hispanic = (X..Hispanic * TOTAL_Enrollment)/100, 
-         asian = (X..Asian * TOTAL_Enrollment)/100, 
+  mutate(total_enroll = X9_Enrollment + X10_Enrollment + 
+           X11_Enrollment + X12_Enrollment, 
+         dropout = (X..Dropped.Out * total_enroll)/100, 
+         black = (X..African.American * total_enroll)/100, 
+         white = (X..White * total_enroll)/100, 
+         hispanic = (X..Hispanic * total_enroll)/100, 
+         asian = (X..Asian * total_enroll)/100, 
          other_re = (X..Native.American + X..Native.Hawaiian..Pacific.Islander + 
-                    X..Multi.Race..Non.Hispanic) * TOTAL_Enrollment/100, 
-         male = (X..Males * TOTAL_Enrollment)/100, 
-         female = (X..Females * TOTAL_Enrollment)/100) %>% 
-  rename("district" = "District.Name", "total_enroll" = "TOTAL_Enrollment", 
+                    X..Multi.Race..Non.Hispanic) * total_enroll/100, 
+         male = (X..Males * total_enroll)/100, 
+         female = (X..Females * total_enroll)/100) %>% 
+  rename("district" = "District.Name",  
          "enroll_10" = "X10_Enrollment", "high_need" = "High.Needs", 
          "econ_dis" = "Economically.Disadvantaged", "town" = "Town", 
          "avg_dist_exp_p" = "Average.In.District.Expenditures.per.Pupil", 
