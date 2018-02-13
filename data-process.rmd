@@ -61,7 +61,7 @@ edu <- edu_orig %>%
 ```
 
 ```{r}
-# Calculate district total
+# Calculate town/district total
 edu_town_district <- edu %>% 
   group_by(town, district) %>% 
   summarize(n_school = n(), enroll = sum(total_enroll), 
@@ -82,8 +82,30 @@ edu_town_district <- edu %>%
             ppi_all = mean(ppi_all, na.rm = TRUE),
             ppi_high_need = mean(ppi_high_need, na.rm = TRUE))
 
-# Calculate district rates
-edu_district <- edu_town_district %>% 
+```
+
+```{r}
+# Calculate the Boston rates
+edu_district_bos <- edu %>% 
+  mutate(district = as.character(district)) %>% 
+  filter(startsWith(district, "Boston")) %>% 
+  summarize(n_school = n(), enroll = sum(total_enroll, na.rm = TRUE), 
+            enroll_10 = sum(enroll_10, na.rm = TRUE),
+            dropout = sum(dropout, na.rm = TRUE),
+            high_need = sum(high_need, na.rm = TRUE), 
+            econ_dis = sum(econ_dis, na.rm = TRUE), 
+            black = sum(black), white = sum(white), 
+            hispanic = sum(hispanic), asian = sum(asian), 
+            other_re = sum(other_re), male = sum(male), 
+            female = sum(female), 
+            avg_dist_exp_p = median(avg_dist_exp_p, na.rm = TRUE), 
+            avg_exp_p = median(avg_exp_p, na.rm = TRUE), 
+            mcas_10_eng_pa = sum(mcas_10_eng_pa, na.rm = TRUE), 
+            mcas_10_eng_wf = sum(mcas_10_eng_wf, na.rm = TRUE), 
+            mcas_10_mth_pa = sum(mcas_10_mth_pa, na.rm = TRUE), 
+            mcas_10_mth_wf = sum(mcas_10_mth_wf, na.rm = TRUE), 
+            ppi_all = mean(ppi_all, na.rm = TRUE),
+            ppi_high_need = mean(ppi_high_need, na.rm = TRUE)) %>% 
   mutate(dropout = dropout/enroll, 
          high_need = high_need/enroll, 
          econ_dis = econ_dis/enroll, 
@@ -96,6 +118,7 @@ edu_district <- edu_town_district %>%
          mcas_10_mth_pa = mcas_10_mth_pa/enroll_10, 
          mcas_10_mth_wf = mcas_10_mth_wf/enroll_10)
 ```
+
 
 ```{r}
 phoenix_charter <- edu_orig %>% 
