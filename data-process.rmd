@@ -88,7 +88,7 @@ edu_town_district <- edu %>%
 # Calculate the Boston rates
 edu_district_bos <- edu %>% 
   mutate(district = as.character(district)) %>% 
-  filter(startsWith(district, "Boston")) %>% 
+  filter(startsWith(district, "Boston") | town == "Boston") %>% 
   summarize(n_school = n(), enroll = sum(total_enroll, na.rm = TRUE), 
             enroll_10 = sum(enroll_10, na.rm = TRUE),
             dropout = sum(dropout, na.rm = TRUE),
@@ -151,15 +151,35 @@ edu_town <- edu_town %>%
 top_drop_town <- edu_town %>% 
   filter(dropout >= 0.10)
 
-boston_drop <- edu_district %>% 
-  filter(district == "Boston", 
-         dropout >= 0.10)
-```
+boston_drop <- edu_town_district %>% 
+  filter(district == "Boston" || town == "Boston") %>% 
+  group_by(town, district) %>% 
+  mutate(dropout = dropout/enroll, 
+         high_need = high_need/enroll, 
+         econ_dis = econ_dis/enroll, 
+         black = black/enroll, white = white/enroll, 
+         hispanic = hispanic/enroll, asian = asian/enroll, 
+         other_re = other_re/enroll)
 
-
-```{r}
-# Boston Wins The Dropout Race: 
-# Home to 50% of The Towns with High School Dropout Rates Over 10% 
+boston_drop_town <- edu_town_district %>% 
+  filter(district == "Boston" || town == "Boston") %>% 
+  group_by(town) %>% 
+  summarise(n_school = sum(n_school, na.rm = TRUE), 
+            enroll = sum(enroll, na.rm = TRUE), 
+            dropout = sum(dropout, na.rm = TRUE), 
+            high_need = sum(high_need, na.rm = TRUE), 
+            econ_dis = sum(econ_dis, na.rm = TRUE), 
+            black = sum(black, na.rm = TRUE), 
+            white = sum(white, na.rm = TRUE), 
+            hispanic = sum(hispanic, na.rm = TRUE),
+            asian = sum(asian, na.rm = TRUE), 
+            other_re = sum(other_re, na.rm = TRUE)) %>% 
+  mutate(dropout = dropout/enroll, 
+         high_need = high_need/enroll, 
+         econ_dis = econ_dis/enroll, 
+         black = black/enroll, white = white/enroll, 
+         hispanic = hispanic/enroll, asian = asian/enroll, 
+         other_re = other_re/enroll)
 
 ```
 
