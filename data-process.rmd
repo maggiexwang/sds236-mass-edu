@@ -22,14 +22,15 @@ edu_orig <- read.csv("MA_Public_Schools_2017.csv")
 edu <- edu_orig %>% 
   mutate(Grade = as.character(Grade)) %>%
   filter(endsWith(Grade, "09,10,11,12")) %>%
-  select(School.Code, Grade, District.Name, Town, 26:29,
+  select(School.Code, Zip, Grade, District.Name, Town, 26:29,
          High.Needs, Economically.Disadvantaged, 
          42:50, Average.In.District.Expenditures.per.Pupil,
          Average.Expenditures.per.Pupil, X..Dropped.Out,  
          MCAS_10thGrade_English_P.A.., MCAS_10thGrade_English_W.F..,
          MCAS_10thGrade_Math_P.A.., MCAS_10thGrade_Math_W.F.., 
          297:298) %>% 
-  mutate(total_enroll = X9_Enrollment + X10_Enrollment + 
+  mutate(Zip = as.character(Zip),
+        total_enroll = X9_Enrollment + X10_Enrollment + 
            X11_Enrollment + X12_Enrollment, 
          dropout = (X..Dropped.Out * total_enroll)/100, 
          black = (X..African.American * total_enroll)/100, 
@@ -40,7 +41,7 @@ edu <- edu_orig %>%
                     X..Multi.Race..Non.Hispanic) * total_enroll/100, 
          male = (X..Males * total_enroll)/100, 
          female = (X..Females * total_enroll)/100) %>% 
-  rename("district" = "District.Name",  
+  rename("district" = "District.Name", "zip" = "Zip",
          "enroll_10" = "X10_Enrollment", "high_need" = "High.Needs", 
          "econ_dis" = "Economically.Disadvantaged", "town" = "Town", 
          "avg_dist_exp_p" = "Average.In.District.Expenditures.per.Pupil", 
@@ -51,7 +52,7 @@ edu <- edu_orig %>%
          "mcas_10_mth_wf" = "MCAS_10thGrade_Math_W.F..", 
          "ppi_all" = "Progress.and.Performance.Index..PPI....All.Students", 
          "ppi_high_need" = "Progress.and.Performance.Index..PPI....High.Needs.Students") %>% 
-  select(district, town, total_enroll, enroll_10,
+  select(district, zip, town, total_enroll, enroll_10,
          high_need, econ_dis, dropout, 
          black, white, hispanic, asian, other_re,
          male, female, avg_dist_exp_p, avg_exp_p, 
@@ -63,7 +64,7 @@ edu <- edu_orig %>%
 ```{r}
 # Calculate town/district total
 edu_town_district <- edu %>% 
-  group_by(town, district) %>% 
+  group_by(town, district, zip) %>% 
   summarize(n_school = n(), enroll = sum(total_enroll), 
             enroll_10 = sum(enroll_10),
             dropout = sum(dropout),
@@ -89,6 +90,37 @@ edu_town_district <- edu %>%
 edu_district_bos <- edu %>% 
   mutate(district = as.character(district)) %>% 
   filter(startsWith(district, "Boston") | town == "Boston") %>% 
+  summarize(n_school = n(), enroll = sum(total_enroll, na.rm = TRUE), 
+            enroll_10 = sum(enroll_10, na.rm = TRUE),
+            dropout = sum(dropout, na.rm = TRUE),
+            high_need = sum(high_need, na.rm = TRUE), 
+            econ_dis = sum(econ_dis, na.rm = TRUE), 
+            black = sum(black), white = sum(white), 
+            hispanic = sum(hispanic), asian = sum(asian), 
+            other_re = sum(other_re), male = sum(male), 
+            female = sum(female), 
+            avg_dist_exp_p = median(avg_dist_exp_p, na.rm = TRUE), 
+            avg_exp_p = median(avg_exp_p, na.rm = TRUE), 
+            mcas_10_eng_pa = sum(mcas_10_eng_pa, na.rm = TRUE), 
+            mcas_10_eng_wf = sum(mcas_10_eng_wf, na.rm = TRUE), 
+            mcas_10_mth_pa = sum(mcas_10_mth_pa, na.rm = TRUE), 
+            mcas_10_mth_wf = sum(mcas_10_mth_wf, na.rm = TRUE), 
+            ppi_all = mean(ppi_all, na.rm = TRUE),
+            ppi_high_need = mean(ppi_high_need, na.rm = TRUE)) %>% 
+  mutate(dropout = dropout/enroll, 
+         high_need = high_need/enroll, 
+         econ_dis = econ_dis/enroll, 
+         black = black/enroll, white = white/enroll, 
+         hispanic = hispanic/enroll, asian = asian/enroll, 
+         other_re = other_re/enroll, male = male/enroll, 
+         female = female/enroll, 
+         mcas_10_eng_pa = mcas_10_eng_pa/enroll_10, 
+         mcas_10_eng_wf = mcas_10_eng_wf/enroll_10,
+         mcas_10_mth_pa = mcas_10_mth_pa/enroll_10, 
+         mcas_10_mth_wf = mcas_10_mth_wf/enroll_10)
+
+# Calculate the Mass overall rates
+edu_mass <- edu %>% 
   summarize(n_school = n(), enroll = sum(total_enroll, na.rm = TRUE), 
             enroll_10 = sum(enroll_10, na.rm = TRUE),
             dropout = sum(dropout, na.rm = TRUE),
@@ -163,7 +195,7 @@ boston_drop <- edu_town_district %>%
 
 boston_drop_town <- edu_town_district %>% 
   filter(district == "Boston" || town == "Boston") %>% 
-  group_by(town) %>% 
+  group_by(town, zip) %>% 
   summarise(n_school = sum(n_school, na.rm = TRUE), 
             enroll = sum(enroll, na.rm = TRUE), 
             dropout = sum(dropout, na.rm = TRUE), 
